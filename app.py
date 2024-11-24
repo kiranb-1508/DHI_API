@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 import torch
 from torchvision import transforms
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 import os
 
 # Initialize the Flask app
@@ -112,6 +112,9 @@ def classify_image():
     if file.filename == '':
         return jsonify({'error': 'Invalid or empty file'}), 400
 
+    if not file.content_type.startswith('image/'):
+        return jsonify({'error': 'Uploaded file is not an image'}), 400
+
     try:
         # Process the uploaded image
         image = Image.open(file).convert('RGB')
@@ -128,9 +131,13 @@ def classify_image():
 
         return jsonify({'class': predicted_class})
     
+    except UnidentifiedImageError:
+        return jsonify({'error': 'Invalid image format'}), 400
+
     except Exception as e:
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=8080)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host="0.0.0.0", port=port)
 

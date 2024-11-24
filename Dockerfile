@@ -10,12 +10,15 @@ COPY . /app
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose port 5000 for the Flask app
-EXPOSE 5000
+# Expose port 8080 for Google Cloud Run
+EXPOSE 8080
 
 # Set environment variable to tell Flask it's in production
 ENV FLASK_ENV=production
 
-# Run gunicorn to serve the Flask app
-CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]
+# Set the PORT environment variable for Cloud Run
+ENV PORT=8080
+
+# Run gunicorn to serve the Flask app, binding to the PORT environment variable
+CMD ["gunicorn", "-b", "0.0.0.0:8080", "app:app"]
 
